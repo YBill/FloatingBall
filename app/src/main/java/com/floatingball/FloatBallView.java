@@ -1,10 +1,12 @@
 package com.floatingball;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.Service;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -28,7 +30,6 @@ public class FloatBallView extends View {
     private final static int MODE_LEFT = 0x003;
     private final static int MODE_RIGHT = 0x004;
     private final static int MODE_MOVE = 0x005;
-    private final static int MODE_GONE = 0x006;
 
     private int mCurrentMode;
 
@@ -61,6 +62,7 @@ public class FloatBallView extends View {
     private int offsY;
 
     private AccessibilityService mService;
+    private Vibrator vibrator;
 
     public FloatBallView(Context context) {
         super(context);
@@ -81,6 +83,7 @@ public class FloatBallView extends View {
 
     private void init(Context context) {
         mService = (AccessibilityService) context;
+        vibrator = (Vibrator) context.getSystemService(Service.VIBRATOR_SERVICE);
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mGestureDetector = new GestureDetector(context, new MyGestureListener(context));
         mPaint = new Paint();
@@ -105,14 +108,17 @@ public class FloatBallView extends View {
 //        mPaint.setColor(Color.CYAN);
 //        canvas.drawRect(0, 0, 2 * ballBgRadius + 2 * cz, 2 * ballBgRadius + 2 * cz, mPaint);
 
-        mPaint.setColor(Color.parseColor(ballBgColor));
+//        mPaint.setColor(Color.parseColor(ballBgColor));
+        mPaint.setColor(Color.argb(200, 72, 72, 72));
         canvas.drawCircle(ballBgRadius + cz, ballBgRadius + cz, ballBgRadius, mPaint);
 
         if (isDown) {
-            mPaint.setColor(Color.parseColor(ballBigColor));
+//            mPaint.setColor(Color.parseColor(ballBigColor));
+            mPaint.setColor(Color.argb(200, 209, 209, 209));
             canvas.drawCircle(ballBgRadius + cz + offsX, ballBgRadius + cz + offsY, ballBigRadius, mPaint);
         } else {
-            mPaint.setColor(Color.parseColor(ballSmallColor));
+//            mPaint.setColor(Color.parseColor(ballSmallColor));
+            mPaint.setColor(Color.argb(200, 163, 163, 163));
             canvas.drawCircle(ballBgRadius + cz, ballBgRadius + cz, ballSmallRadius, mPaint);
         }
 
@@ -149,8 +155,8 @@ public class FloatBallView extends View {
                     return true;
                 }
                 if (isLongTouch) {
-                    mLayoutParams.x = (int) (event.getRawX());
-                    mLayoutParams.y = (int) (event.getRawY() - getStatusBarHeight());
+                    mLayoutParams.x = (int) (event.getRawX() - mOffsetToParent);
+                    mLayoutParams.y = (int) (event.getRawY() - getStatusBarHeight() - mOffsetToParent);
                     mWindowManager.updateViewLayout(FloatBallView.this, mLayoutParams);
                     mCurrentMode = MODE_MOVE;
                 } else {
@@ -165,6 +171,7 @@ public class FloatBallView extends View {
 
                 } else if (isSingleClick) {
                     AccessibilityUtil.doBack(mService);
+                    vibrator.vibrate(20);
                 } else {
                     doUp();
                 }
@@ -176,18 +183,23 @@ public class FloatBallView extends View {
 
         return super.onTouchEvent(event);
     }
-
     private void doUp() {
         switch (mCurrentMode) {
             case MODE_LEFT:
+                AccessibilityUtil.doHome(mService);
+                vibrator.vibrate(20);
+                break;
             case MODE_RIGHT:
                 AccessibilityUtil.doLeftOrRight(mService);
+                vibrator.vibrate(20);
                 break;
             case MODE_DOWN:
                 AccessibilityUtil.doPullDown(mService);
+                vibrator.vibrate(20);
                 break;
             case MODE_UP:
-                AccessibilityUtil.doPullUp(mService);
+                AccessibilityUtil.doSettings(mService);
+                vibrator.vibrate(20);
                 break;
 
         }
@@ -299,6 +311,7 @@ public class FloatBallView extends View {
             // 长按，触摸屏按下后既不抬起也不移动，过一段时间后触发
             Log.d("Bill", "onLongPress");
             isLongTouch = true;
+            vibrator.vibrate(50);
         }
 
         @Override

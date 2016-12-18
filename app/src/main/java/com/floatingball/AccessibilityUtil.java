@@ -3,6 +3,7 @@ package com.floatingball;
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.provider.Settings;
 
 /**
@@ -10,6 +11,19 @@ import android.provider.Settings;
  */
 
 public class AccessibilityUtil {
+
+    /**
+     * 设置
+     *
+     * @param context
+     */
+    @SuppressLint("NewApi")
+    public static void doSettings(Context context) {
+        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
     /**
      * 单击返回功能
      *
@@ -31,12 +45,12 @@ public class AccessibilityUtil {
     }
 
     /**
-     * 上拉返回桌面
+     * 返回桌面
      *
      * @param service
      */
     @SuppressLint("NewApi")
-    public static void doPullUp(AccessibilityService service) {
+    public static void doHome(AccessibilityService service) {
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
     }
 
