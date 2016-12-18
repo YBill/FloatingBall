@@ -2,6 +2,7 @@ package com.floatingball;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -22,7 +23,9 @@ public class FloatWindowManager {
             int screenHeight = windowManager.getDefaultDisplay().getHeight();
             mBallView = new FloatBallView(context);
             LayoutParams params = new LayoutParams();
-            params.x = screenWidth / 2;
+            params.x = screenWidth / 2 - (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 10, context.getResources().getDisplayMetrics()
+            );
             params.y = screenHeight / 2;
             params.width = WindowManager.LayoutParams.WRAP_CONTENT;
             params.height = WindowManager.LayoutParams.WRAP_CONTENT;
